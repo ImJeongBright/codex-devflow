@@ -162,38 +162,33 @@ Run 종료 시 다음을 기록합니다.
 - elapsed time
 - 수집 가능한 Codex usage 정보
 
-## 두 번째 실행
+## 이후 단계
 
-첫 번째 end-to-end가 실제 저장소에서 동작한 뒤 진행합니다.
+001 이후의 세부 발전 순서는 [Roadmap](../ROADMAP.md)에서 관리합니다.
 
-- reusable Skill 추가
-- database / reliability / test review procedure
-- specialized review routing
-- 실제 Run 데이터 기반 policy 수정
-- metric 확장
-
-Skill은 workflow engine을 대체하지 않고 반복 가능한 engineering procedure를 정의합니다.
-
-## 세 번째 실행
-
-독립 context 또는 병렬 처리가 실제로 필요하다는 근거가 생긴 뒤 진행합니다.
-
-- Codex Subagent 도입
-- 독립 Review 병렬화
-- usage / latency 증가 측정
-- 실제 outcome을 개선한 Subagent만 유지
-
-## 네 번째 실행
-
-반복 가능한 Eval Harness를 만듭니다.
+핵심 순서는 다음과 같습니다.
 
 ~~~text
-Direct Codex
-Codex + Skill
-Codex DevFlow
+001 Single Workflow MVP
+        ↓
+Reusable Skills
+        ↓
+Review Routing
+        ↓
+Parallel CLI Workers
+        ↓
+필요한 경우에만 Native Subagent 검토
+        ↓
+Eval Harness
+        ↓
+Policy Refinement
+        ↓
+Real-world Dogfooding
 ~~~
 
-실제 프로젝트 Task를 동일 조건으로 실행하고 docs/EVALUATION.md 지표를 기록합니다.
+중요한 점은 다음 단계를 미리 모두 구현하지 않는 것입니다.
+
+각 확장은 이전 단계의 실제 사용과 Eval에서 필요성이 확인됐을 때만 진행합니다.
 
 ## 현재 미확정
 
