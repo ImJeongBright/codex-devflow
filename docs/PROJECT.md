@@ -1,6 +1,20 @@
 # 프로젝트 정의
 
-## 1. 문제
+## 1. 정체성
+
+Codex DevFlow는 새로운 Coding Agent나 범용 Multi-Agent Framework를 만드는 프로젝트가 아닙니다.
+
+**이미 사용하는 Codex를 더 일관되고 검증 가능하게 사용하는 local-first orchestration layer**입니다.
+
+사용자가 반복적으로 수행하던 다음 개발 지휘를 하나의 재사용 가능한 workflow로 옮깁니다.
+
+~~~text
+Analyze → Plan → Implement → Validate → Review → Repair → Document
+~~~
+
+정체성, 기존 방식과의 차이, 기대효과에 대한 상세 설명은 [WHY.md](WHY.md)를 참고합니다.
+
+## 2. 문제
 
 Coding Agent는 이미 저장소 탐색, 계획, 구현, 리뷰를 수행할 수 있습니다.
 
@@ -23,7 +37,7 @@ Coding Agent는 이미 저장소 탐색, 계획, 구현, 리뷰를 수행할 수
 - 어떤 단계에서 실패했는지 구분하기 어려움
 - Skill, Review, Multi-Agent를 추가했을 때 실제 효과를 측정하기 어려움
 
-## 2. 목표
+## 3. 목표
 
 Codex DevFlow는 큰 개발 요청 하나를 받아 반복 가능한 로컬 workflow로 변환합니다.
 
@@ -31,7 +45,7 @@ Codex DevFlow는 큰 개발 요청 하나를 받아 반복 가능한 로컬 work
 
 **이미 사용하는 Codex를 더 일관되고 검증 가능하게 사용하는 얇은 orchestration layer**를 만드는 프로젝트입니다.
 
-## 3. 대표 사용 사례
+## 4. 대표 사용 사례
 
 입력:
 
@@ -53,7 +67,7 @@ ImTicket에 메시지 버스 기반 비동기 후처리를 추가한다.
 
 사용자는 각 단계를 매번 직접 지시하지 않아야 합니다.
 
-## 4. 핵심 가설
+## 5. 핵심 가설
 
 Workflow를 복잡하게 만들면 Codex 사용량과 elapsed time도 증가합니다.
 
@@ -63,7 +77,20 @@ Workflow를 복잡하게 만들면 Codex 사용량과 elapsed time도 증가합�
 
 반대로 단순 Task에서는 일반 Codex 실행이 더 효율적이라는 결과도 허용합니다.
 
-## 5. 제품 원칙
+## 6. 기대효과
+
+다음은 구현 후 Eval로 확인할 가설입니다.
+
+- 반복적인 후속 지시 감소
+- 개발 절차의 일관성
+- deterministic validation을 통한 검증 강화
+- 실패 단계와 repair 이력 추적
+- 실제 프로젝트에서 반복 사용 가능한 개인 개발 도구
+- Task 복잡도에 따른 선택적인 orchestration
+
+측정 없이 생산성이나 품질 향상을 확정적으로 주장하지 않습니다.
+
+## 7. 제품 원칙
 
 ### Local First
 
@@ -93,6 +120,12 @@ DevFlow:
 - 언제 중단할지
 - artifact를 어디에 남길지
 
+### Skill과 Workflow 분리
+
+Skill은 특정 업무를 수행하는 방법을 제공합니다.
+
+DevFlow는 Skill을 포함해 어떤 단계를 언제 실행하고 어떻게 연결할지 관리합니다.
+
 ### Multi-Agent는 필요할 때만
 
 Subagent 수는 성과 지표가 아닙니다.
@@ -103,7 +136,7 @@ Subagent 수는 성과 지표가 아닙니다.
 
 초기 버전은 working tree를 수정하고 evidence를 만들 수 있지만 push / merge를 암묵적으로 수행하지 않습니다.
 
-## 6. 성공 기준
+## 8. 성공 기준
 
 - 하나의 명령으로 end-to-end workflow 시작
 - Codex 분석 결과를 structured data로 획득
@@ -114,7 +147,7 @@ Subagent 수는 성과 지표가 아닙니다.
 - 동일 Task로 direct Codex와 비교 가능
 - 실제 개인 프로젝트 개발에서 반복 사용 가능
 
-## 7. 초기 Non-goal
+## 9. 초기 Non-goal
 
 - Multi-LLM
 - Remote SaaS
