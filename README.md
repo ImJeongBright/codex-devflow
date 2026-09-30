@@ -23,6 +23,8 @@ Skill은 "이 일을 어떻게 할지"를 제공하고, DevFlow는 "언제 어�
 
 Multi-Agent는 목표가 아닙니다. 실제 Task에서 독립적인 review나 context isolation이 이득일 때만 사용합니다.
 
+Planner / Implementer / Reviewer 역할 분리도 처음부터 native Subagent를 요구하지 않습니다. V1에서는 DevFlow가 필요한 역할마다 독립적인 `codex exec` CLI worker를 실행하고 결과를 취합합니다.
+
 더 자세한 배경과 차별점은 [왜 Codex DevFlow인가](docs/WHY.md)를 참고합니다.
 
 ## 문제

@@ -166,6 +166,35 @@ Specialized Review
 
 Multi-Agent는 프로젝트의 정체성이 아니라 **Eval 결과에 따라 선택할 수 있는 구현 수단**입니다.
 
+### 역할 분리와 Subagent의 차이
+
+Planner, Implementer, Reviewer를 서로 다른 역할로 나누는 것 자체는 native Subagent를 요구하지 않습니다.
+
+첫 버전에서는 DevFlow가 역할별로 독립적인 Codex CLI worker를 실행할 수 있습니다.
+
+~~~text
+사용자
+  ↓
+DevFlow
+  |
+  +-- Planner Worker        = codex exec
+  +-- Implementer Worker    = codex exec
+  +-- DB Review Worker      = codex exec
+  +-- Reliability Worker    = codex exec
+~~~
+
+사용자가 여러 Codex 세션을 직접 실행하는 것이 아니라 DevFlow가 필요한 worker를 자동으로 생성하고 결과를 취합합니다.
+
+이 구조에서:
+
+- **Role**은 무엇을 담당하는지 정의합니다.
+- **CLI Worker**는 그 Role을 수행하는 독립 Codex 실행입니다.
+- **Native Subagent**는 Agent runtime 내부에서 parent agent가 생성하고 위임하는 별도 실행 단위입니다.
+
+따라서 V1은 API 기반 native Subagent 없이도 Planner → Implementer → Reviewer 역할 분리를 구현할 수 있습니다.
+
+초기에는 구현 작업은 한 worker가 담당하고, DB / Reliability / Test 같은 독립적인 review만 병렬 worker 후보로 둡니다. 실제 Eval에서 이 방식의 한계가 확인될 때 native Subagent 또는 다른 execution backend를 검토합니다.
+
 ---
 
 ## 6. Codex CLI를 사용하는 이유

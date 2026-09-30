@@ -61,6 +61,51 @@ CodexExecutionBackend
 
 첫 구현에서는 CodexCliBackend만 구현합니다.
 
+### 2.1 역할 분리와 Subagent는 같은 개념이 아니다
+
+Planner, Implementer, Reviewer처럼 역할을 나누기 위해 반드시 OpenAI의 native Subagent 기능이 필요한 것은 아닙니다.
+
+V1에서는 DevFlow가 필요한 역할마다 **독립적인 `codex exec` 프로세스**를 실행합니다.
+
+~~~text
+DevFlow
+  |
+  +-- codex exec #1  → Planner
+  +-- codex exec #2  → Implementer
+  +-- codex exec #3  → General Reviewer
+  +-- codex exec #4  → Database Reviewer
+  +-- codex exec #5  → Reliability Reviewer
+~~~
+
+각 worker는 같은 Codex CLI를 사용하지만 별도의 실행 context를 가집니다. 사용자가 Codex 창을 여러 개 직접 띄우는 것이 아니라 DevFlow가 worker의 생성, 입력, 종료, 결과 수집을 관리합니다.
+
+따라서 초기 구조는 다음과 같이 구분합니다.
+
+~~~text
+Role
+= Planner / Implementer / Reviewer처럼 "무슨 일을 맡는가"
+
+CLI Worker
+= DevFlow가 특정 Role을 수행하도록 실행한 독립 codex exec 프로세스
+
+Native Subagent
+= OpenAI Agent runtime 내부에서 parent agent가 spawn/delegate하는 별도 agent
+~~~
+
+V1의 역할 분리는 CLI Worker로 충분합니다. Native Subagent는 독립 context, delegation, 병렬 협업이 실제로 추가 이점을 만든다는 근거가 생긴 뒤 검토합니다.
+
+특히 초기에는 코드 변경을 여러 worker가 동시에 수행하지 않습니다.
+
+~~~text
+Implementation
+→ 단일 Codex Worker
+
+Independent Review
+→ 필요 시 여러 Read-only Codex Worker
+~~~
+
+이렇게 하면 같은 파일에 대한 병렬 수정 충돌을 피하면서도 review 관점은 분리할 수 있습니다.
+
 ## 3. 전체 흐름
 
 ~~~text
@@ -236,7 +281,7 @@ async / retry / idempotency / concurrency
     → reliability review
 ~~~
 
-향후 독립 Review를 Subagent로 병렬 실행할 수 있지만, 첫 구현의 필수 조건은 아닙니다.
+초기에는 독립 Review가 필요하면 DevFlow가 여러 `codex exec` CLI Worker를 실행해 결과를 취합할 수 있습니다. Native Subagent는 첫 구현의 필수 조건이 아닙니다.
 
 ## 10. Run Artifact
 
