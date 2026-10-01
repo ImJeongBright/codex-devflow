@@ -74,6 +74,31 @@ final run record
 
 ---
 
+## Foundation — Worker Role, Model Policy, Interactive UX
+
+관련 문서:
+
+- docs/plans/002-worker-role-model-interactive-ux.md
+
+Stage 0에서 end-to-end workflow가 동작한 뒤, 다음 확장 전에 실행 단위를 명확하게 만든다.
+
+목표:
+
+- Core Role 확정: scout / planner / implementer / reviewer / repairer
+- Role별 explicit model / reasoning policy
+- Planner 기본값은 `gpt-6.1-sol / high`
+- 나머지 Core Role 기본값은 `gpt-6-luna / max`
+- 사용자 Role별 override
+- `codex-devflow feature` interactive terminal UX
+- worker별 실행 조건을 run artifact에 기록
+- 기존 direct CLI / automation path 유지
+
+이 단계는 전문 Reviewer, 병렬 Worker, native Subagent를 추가하지 않는다.
+
+완료 후 실제 사용에서 반복되는 review procedure가 확인되면 Stage 1로 넘어간다.
+
+---
+
 ## Stage 1 — Reusable Skills
 
 목표:
@@ -418,6 +443,8 @@ Roadmap에서도 다음은 목표가 아닙니다.
 
 ~~~text
 001 Single Workflow MVP
+        ↓
+Worker Role / Model Policy / Interactive UX
         ↓
 Reusable Skills
         ↓

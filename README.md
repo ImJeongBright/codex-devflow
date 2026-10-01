@@ -195,6 +195,7 @@ Codex DevFlow
 - [평가 전략](docs/EVALUATION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [첫 번째 구현 계획](docs/plans/001-initial-implementation.md)
+- [002 Worker Role / Model Policy / Interactive UX](docs/plans/002-worker-role-model-interactive-ux.md)
 - [공식 레퍼런스](docs/REFERENCES.md)
 
 ## 현재 상태
