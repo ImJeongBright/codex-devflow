@@ -47,7 +47,7 @@ python3 -m venv .venv
   --validate "python3 -m unittest discover -s tests -v"
 ~~~
 
-공백이 포함된 경로와 task는 따옴표로 감쌉니다. `--repo`를 생략하면 현재 디렉터리가 Git 저장소인지 확인하고 해당 저장소를 대상으로 삼습니다. 입력 task는 비워 둘 수 없습니다.
+공백이 포함된 경로와 task는 따옴표로 감쌉니다. `--repo`를 생략하면 현재 디렉터리를 사용합니다. 지정하거나 현재 선택한 디렉터리는 정확한 Git 루트여야 합니다. 상위 폴더의 Git 저장소에 속한 하위 폴더라면 범위를 자동 확장하지 않고 오류로 종료합니다. 작업할 저장소 루트로 이동하거나 해당 프로젝트를 독립 Git 저장소로 초기화하세요. 입력 task는 비워 둘 수 없습니다.
 
 요청에는 바뀌어야 할 동작, 성공으로 볼 조건, 관련 제약을 적습니다. 예를 들어 다음처럼 작성할 수 있습니다.
 
@@ -192,11 +192,12 @@ Scout, Plan, Review는 Codex CLI의 `read-only` sandbox로 실행합니다. Impl
 
 실행 중 Ctrl+C를 누르면 현재 subprocess group을 정리하고 중단 상태를 artifact에 기록합니다. 한 Git 저장소에서는 동시에 한 DevFlow run만 시작할 수 있습니다.
 
-TTY에서는 현재 Role의 model/reasoning과 시작·완료 상태, validation 명령/출력, repair 횟수, 최종 요약과 Exec 경로를 stderr에 표시합니다. Direct mode에서 stdout을 파일로 redirect하면 기존 최종 JSON만 저장되며 interactive prompt가 생기지 않습니다.
+TTY에서는 Repository evidence 준비 시작/완료, 현재 Role의 model/reasoning과 시작·완료 상태, validation 명령/출력, repair 횟수, 최종 요약과 Exec 경로를 stderr에 표시합니다. 준비 시작 시 run.json의 stage는 prepare로 기록합니다. Direct mode에서 stdout을 파일로 redirect하면 기존 최종 JSON만 저장되며 interactive prompt가 생기지 않습니다.
 
 ## 7. 문제가 생겼을 때
 
 - **`codex`를 찾을 수 없음:** Codex CLI 설치 상태를 확인하거나 `--codex`에 실행 파일 경로를 전달합니다.
+- **Repository evidence에서 오래 대기함:** 정확한 Git 루트와 ignore 설정을 확인합니다. 준비 단계는 시작 전 파일 snapshot/diff를 수집하며 worker timeout과 별개입니다. 첫 worker를 시작하지 못한 실행은 중단/실패 시 최종 evidence를 다시 수집하지 않고 제한을 기록합니다.
 - **로그인 오류:** `codex login status`로 상태를 보고 필요하면 `codex login`을 실행합니다.
 - **Validation이 실패함:** `validation.json`에서 실패한 명령과 stdout/stderr 파일을 확인합니다. Repair 횟수를 모두 사용하면 run이 `failed`로 끝납니다.
 - **결과가 `unverified`:** `.codex-devflow.json`이나 `--validate`에 실제 검사 명령을 지정하고 다시 실행합니다.

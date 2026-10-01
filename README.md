@@ -45,6 +45,8 @@ python3 -m venv .venv
 
 Codex 인증은 설치된 CLI 설정을 따릅니다. 모델과 reasoning은 아래의 역할별 정책을 명시적으로 전달합니다. DevFlow에는 API client나 API key 관리 기능이 없습니다. 실제 Codex 실행에는 계정의 사용량과 네트워크 연결이 필요합니다.
 
+`--repo`에는 작업할 Git 저장소의 루트를 지정합니다. 생략하면 현재 디렉터리를 사용하며 이 디렉터리도 Git 루트여야 합니다. 지정한 폴더가 상위 저장소에 속하면 오류로 종료합니다. 전체 상위 폴더를 작업 대상으로 자동 선택하지 않습니다. TTY에서는 첫 worker 전에 Repository evidence 준비 시작/완료도 표시합니다.
+
 ## 프로젝트별 검증 설정
 
 Target Git 저장소 루트에 `.codex-devflow.json`을 작성합니다.

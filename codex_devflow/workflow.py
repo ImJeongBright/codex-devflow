@@ -181,6 +181,8 @@ class Workflow:
         self.before, self.baseline_diff = {}, ""
         snapshot_ready = False
         try:
+            self.checkpoint("prepare")
+            self.emit("preparation_started", repository=str(self.repo))
             self.before = repository.snapshot(self.repo)
             snapshot_ready = True
             self.baseline_diff = repository.diff(self.repo)
@@ -188,6 +190,7 @@ class Workflow:
             (self.run_dir / "baseline.diff").write_text(self.baseline_diff, encoding="utf-8")
             self.record["initial_head"] = repository.git(
                 self.repo, "rev-parse", "--verify", "HEAD", check=False).stdout.decode().strip() or None
+            self.emit("preparation_finished", repository=str(self.repo))
             analysis = self.worker(Role.SCOUT, "Inspect the repository read-only. Return semantic signals. "
                                    "Use unknown if uncertain. Do not implement or plan yet.", schema.ANALYSIS)
             self.record["analysis"] = analysis
@@ -246,8 +249,11 @@ class Workflow:
         finally:
             self.emit("finalize_started")
             try:
-                if snapshot_ready:
+                if snapshot_ready and self.record["steps"]:
                     self.evidence()
+                elif not self.record["steps"]:
+                    self.record["limitations"].append(
+                        "Final Git evidence skipped: no worker started; repository preparation may be incomplete.")
             except Exception as exc:
                 self.record["limitations"].append(f"Final Git evidence unavailable: {exc}")
                 if self.record["status"] in ("succeeded", "unverified"):

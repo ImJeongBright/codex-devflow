@@ -15,7 +15,11 @@ def git(repo, *args, check=True):
 
 def root(path):
     path = Path(path).expanduser().resolve()
-    return Path(os.fsdecode(git(path, "rev-parse", "--show-toplevel").stdout).strip()).resolve()
+    repo = Path(os.fsdecode(git(path, "rev-parse", "--show-toplevel").stdout).strip()).resolve()
+    if not path.samefile(repo):
+        raise ValueError(f"Requested repository {path} is not its Git root ({repo}). "
+                         "Use the intended Git root or initialize this project as a separate repository.")
+    return repo
 
 
 def files(repo):

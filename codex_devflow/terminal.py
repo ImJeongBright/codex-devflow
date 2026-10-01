@@ -156,7 +156,11 @@ class TerminalProgress:
 
     def __call__(self, event):
         kind = event["event"]
-        if kind == "worker_started":
+        if kind == "preparation_started":
+            message = f"[running] Repository evidence — {event['repository']}"
+        elif kind == "preparation_finished":
+            message = "[completed] Repository evidence"
+        elif kind == "worker_started":
             message = f"[running] {event['role']} — {event['model']} / {event['reasoning_effort']}"
         elif kind == "worker_finished":
             message = (f"[{event['status']}] {event['role']} — {event['elapsed_seconds']:.1f}s"

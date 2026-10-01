@@ -71,6 +71,8 @@ Prompt는 push, PR 생성, merge, commit, branch 삭제, 파괴적 DB 작업, su
 
 ## Artifact와 변경 추적
 
+Repository 입력은 지정 디렉터리와 Git 루트가 samefile로 일치해야 한다. 하위 폴더를 지정하면 run 생성 전에 오류로 종료하며 상위 폴더로 작업 범위를 자동 확대하지 않는다. Git worktree와 symlink는 같은 물리적 루트이면 허용한다.
+
 Target의 `.codex-devflow/runs/<UTC timestamp>-<random id>/`에 저장한다. 한 repository의 동시 run은 파일 lock으로 차단한다.
 
 - `task.json`, `analysis.json`, `plan.json`, `plan.md`
@@ -80,6 +82,8 @@ Target의 `.codex-devflow/runs/<UTC timestamp>-<random id>/`에 저장한다. �
 - `validation.json`, `review.json`, `repair.json`, `run.json`, `exec.md`
 
 설정·repository 사전 검증 오류는 run 생성 전에 종료할 수 있다. 단계별 파일은 실행된 만큼 생성한다. Simple plan은 생략 사유만 기록한다. `run.json`을 단계 전환마다 갱신하고 정상 종료·실패·catch 가능한 중단 시 최종화한다. JSON은 임시 파일을 replace하여 저장한다.
+
+처음 snapshot/diff 수집 전에 prepare checkpoint와 preparation_started event를 기록하고 준비 완료 event를 보낸다. 첫 worker 시작 전 실패/중단이면 최종 Git evidence 재수집을 생략하고 제한을 기록한다. Repository 준비 자체에는 worker timeout이 적용되지 않는다.
 
 시작 전과 종료 시 Git이 인식하는 파일의 내용 hash·mode·symlink target을 비교해 changed files를 산출한다. `.codex-devflow/`는 제외한다. 기존 미커밋 변경을 되돌리지 않는다. Review에 현재 diff와 시작 diff를 함께 제공한다. 현재 diff에는 기존 변경도 포함되므로 변경 파일 목록과 baseline을 같이 해석한다.
 
