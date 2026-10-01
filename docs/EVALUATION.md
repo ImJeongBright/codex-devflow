@@ -191,3 +191,34 @@ Plan → Implement → Validate → Review
 > Multi-Agent를 구축해서 생산성을 높였다.
 
 숫자와 실험 조건이 없는 성능 주장은 하지 않습니다.
+
+
+## 12. V0에서 실제로 수집하는 항목
+
+001 구현은 `run.json`과 `exec.md`에 다음 값을 기록한다.
+
+| 항목 | 근거와 해석 |
+| --- | --- |
+| validation pass | 설정된 모든 shell 명령의 exit code 0, timeout 없음 |
+| first-pass validation | 첫 validation attempt 결과; 명령 미설정이면 null |
+| elapsed | 전체 run과 subprocess별 monotonic elapsed seconds |
+| Codex run count | 시작한 worker 수; 실패한 실행도 포함 |
+| repair/validation attempts | 실행 이력의 길이 |
+| changed files | 시작·종료 snapshot의 차이; 기존 변경은 baseline으로 보존 |
+| usage | Codex JSONL의 usage 객체 원형; 미노출이면 null |
+| workflow/plan/review | deterministic 선택 결과와 실제 worker artifact |
+
+`validation pass`는 사용자의 acceptance criteria 충족을 자동으로 확정하지 않는다. Review 결과와 task success 역시 구분한다. Human rework, unrelated change, 품질 개선, credit·비용 개선은 현재 자동 측정하지 않는다.
+
+검증 명령 미설정은 `unavailable`이며 최종 run은 `unverified`가 된다. Codex 응답의 성공 선언으로 이 상태를 바꾸지 않는다. Validation 또는 review가 실패하면 최대 repair 횟수만큼 반복하고, 실행 오류·schema 오류·중단은 evidence를 남기고 종료한다.
+
+테스트는 fake executable을 통한 제어 로직 검증과 실제 로그인된 Codex를 통한 end-to-end 실행으로 구분한다. Fake usage는 parser 검증용 값이며 실제 사용량 집계와 비교 실험에 포함하지 않는다. 구체적인 실행 환경·명령·결과·제한은 [001 Exec](exec/001-initial-implementation.md)에 기록한다. V0에서는 Direct Codex 비교 실험과 eval harness를 구현하지 않았다.
+
+
+## 13. 002에서 고정한 실행 조건
+
+Core Role은 scout/planner/implementer/reviewer/repairer다. 실행 전에 effective model/reasoning/sandbox를 계산하며 worker별 started/finished, elapsed, exit/timeout/interruption 및 CLI raw usage를 연결한다. Default policy는 planner=gpt-6.1-sol/high, 나머지=gpt-6-luna/max다. Global/repository/run override를 적용한 최종 값은 settings와 workers에 남긴다.
+
+metrics.roles는 실제 실행된 Role의 run count, elapsed와 raw usage를 모은다. Simple에서 생략한 planner/reviewer를 실행 수에 포함하지 않는다. Model별 품질 순위, 자동 model 승격, 생산성 개선의 결론은 내리지 않는다. 실행 재현성과 Role별 관측을 위한 변경이다.
+
+실제 TTY, fake backend 회귀 테스트와 로그인된 Codex 검증 결과는 [002 Exec](exec/002-worker-role-model-interactive-ux.md)에 기록한다.

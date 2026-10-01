@@ -754,3 +754,11 @@ Role별 model 차이가 elapsed / usage / human rework에 어떤 영향을 주�
 기존 001 실행에서 발견된 runtime error 원인 전달 문제는 별도 후속 Plan으로 다룬다.
 
 그 다음 실제 사용에서 반복되는 검토 절차가 확인되면 Roadmap의 Reusable Skills / Review Routing으로 진행한다.
+
+## 구현 결정
+
+- 글로벌 설정은 `${XDG_CONFIG_HOME:-~/.config}/codex-devflow/config.json`에서 읽는다. UI 저장 동작은 repository의 role 기본값만 저장한다.
+- Python 표준 라이브러리로 번호 선택 메뉴와 한 줄/여러 줄 Task 입력을 제공한다. 기본 사용은 Task 입력 후 Enter로 실행한다.
+- CLI override는 `--role-model ROLE=MODEL`, `--role-reasoning ROLE=EFFORT`를 반복해서 지정한다.
+- stdout의 최종 JSON 출력은 유지하고, TTY 진행 표시는 stderr에 쓴다. Workflow는 terminal과 분리된 event callback만 제공한다.
+- 기존 artifact 필드와 output schema version 1을 유지하고, 새 run에 `artifact_version: 2`와 `workers`, effective policy 및 Role별 metrics를 추가한다.

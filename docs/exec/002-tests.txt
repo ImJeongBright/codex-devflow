@@ -1,0 +1,55 @@
+test_bad_schema_rejected (test_devflow.PolicyTests.test_bad_schema_rejected) ... ok
+test_each_risk_routes_to_planned (test_devflow.PolicyTests.test_each_risk_routes_to_planned) ... ok
+test_local_low_risk_is_simple (test_devflow.PolicyTests.test_local_low_risk_is_simple) ... ok
+test_stdout_stderr_and_exit_status (test_devflow.ProcessTests.test_stdout_stderr_and_exit_status) ... ok
+test_timeout_kills_child_process_group (test_devflow.ProcessTests.test_timeout_kills_child_process_group) ... ok
+test_sigint_preserves_validation_evidence_and_kills_children (test_devflow.ValidationSignalTests.test_sigint_preserves_validation_evidence_and_kills_children) ... ok
+test_sigterm_preserves_validation_evidence_and_kills_children (test_devflow.ValidationSignalTests.test_sigterm_preserves_validation_evidence_and_kills_children) ... ok
+test_cli_exit_codes_and_config (test_devflow.WorkflowTests.test_cli_exit_codes_and_config) ... ok
+test_cli_failure_exit_codes (test_devflow.WorkflowTests.test_cli_failure_exit_codes) ... ok
+test_codex_failures_preserve_final_artifacts (test_devflow.WorkflowTests.test_codex_failures_preserve_final_artifacts) ... ok
+test_config_rejects_bad_values_and_cli_overrides (test_devflow.WorkflowTests.test_config_rejects_bad_values_and_cli_overrides) ... ok
+test_interruption_between_validation_commands (test_devflow.WorkflowTests.test_interruption_between_validation_commands) ... ok
+test_interruption_finalizes_run (test_devflow.WorkflowTests.test_interruption_finalizes_run) ... ok
+test_lock_prevents_simultaneous_run (test_devflow.WorkflowTests.test_lock_prevents_simultaneous_run) ... ok
+test_missing_executable_is_recorded (test_devflow.WorkflowTests.test_missing_executable_is_recorded) ... ok
+test_missing_validation_is_unverified_even_with_passing_review (test_devflow.WorkflowTests.test_missing_validation_is_unverified_even_with_passing_review) ... ok
+test_planned_end_to_end_artifacts_and_context (test_devflow.WorkflowTests.test_planned_end_to_end_artifacts_and_context) ... ok
+test_preexisting_changes_are_preserved_and_not_counted (test_devflow.WorkflowTests.test_preexisting_changes_are_preserved_and_not_counted) ... ok
+test_repair_worker_error_finalizes_repair (test_devflow.WorkflowTests.test_repair_worker_error_finalizes_repair) ... ok
+test_repair_worker_interruption_finalizes_repair (test_devflow.WorkflowTests.test_repair_worker_interruption_finalizes_repair) ... ok
+test_review_failure_repairs (test_devflow.WorkflowTests.test_review_failure_repairs) ... ok
+test_review_failure_stops_at_limit (test_devflow.WorkflowTests.test_review_failure_stops_at_limit) ... ok
+test_simple_skips_plan_review (test_devflow.WorkflowTests.test_simple_skips_plan_review) ... ok
+test_validation_repair_then_revalidate_and_rereview (test_devflow.WorkflowTests.test_validation_repair_then_revalidate_and_rereview) ... ok
+test_validation_timeout_is_failure (test_devflow.WorkflowTests.test_validation_timeout_is_failure) ... ok
+test_worker_saves_process_evidence_before_reraising_interruption (test_devflow.WorkflowTests.test_worker_saves_process_evidence_before_reraising_interruption) ... ok
+test_zero_repairs_and_all_validation_commands_recorded (test_devflow.WorkflowTests.test_zero_repairs_and_all_validation_commands_recorded) ... ok
+test_all_layers_merge_by_role_and_field (test_worker_ux.ConfigTests.test_all_layers_merge_by_role_and_field) ... ok
+test_bad_global_json_reports_path (test_worker_ux.ConfigTests.test_bad_global_json_reports_path) ... ok
+test_global_overrides_builtins (test_worker_ux.ConfigTests.test_global_overrides_builtins) ... ok
+test_invalid_configuration_never_starts_workers (test_worker_ux.ConfigTests.test_invalid_configuration_never_starts_workers) ... ok
+test_cancel_and_eof (test_worker_ux.InputTests.test_cancel_and_eof) ... ok
+test_customize_only_reviewer_and_save_preserves_validation (test_worker_ux.InputTests.test_customize_only_reviewer_and_save_preserves_validation) ... ok
+test_direct_task_never_opens_interactive_ui (test_worker_ux.InputTests.test_direct_task_never_opens_interactive_ui) ... ok
+test_failure_progress_includes_stdout_and_stderr (test_worker_ux.InputTests.test_failure_progress_includes_stdout_and_stderr) ... ok
+test_multiline_task (test_worker_ux.InputTests.test_multiline_task) ... ok
+test_non_tty_missing_task_is_usage_error (test_worker_ux.InputTests.test_non_tty_missing_task_is_usage_error) ... ok
+test_progress_shows_validation_failure_and_repair_budget (test_worker_ux.InputTests.test_progress_shows_validation_failure_and_repair_budget) ... ok
+test_real_pty_cancel_starts_no_workers (test_worker_ux.InputTests.test_real_pty_cancel_starts_no_workers) ... ok
+test_real_pty_customization_applies_only_to_reviewer (test_worker_ux.InputTests.test_real_pty_customization_applies_only_to_reviewer) ... ok
+test_real_pty_default_interactive_flow_and_live_progress (test_worker_ux.InputTests.test_real_pty_default_interactive_flow_and_live_progress) ... ok
+test_task_and_enter_use_defaults_without_model_input (test_worker_ux.InputTests.test_task_and_enter_use_defaults_without_model_input) ... ok
+test_interrupted_worker_preserves_policy_and_available_usage (test_worker_ux.PolicyEvidenceTests.test_interrupted_worker_preserves_policy_and_available_usage) ... ok
+test_policy_matches_every_subprocess_and_artifact (test_worker_ux.PolicyEvidenceTests.test_policy_matches_every_subprocess_and_artifact) ... ok
+test_progress_failure_does_not_change_workflow (test_worker_ux.PolicyEvidenceTests.test_progress_failure_does_not_change_workflow) ... ok
+test_simple_records_only_executed_roles (test_worker_ux.PolicyEvidenceTests.test_simple_records_only_executed_roles) ... ok
+test_timeout_retains_policy_and_result (test_worker_ux.PolicyEvidenceTests.test_timeout_retains_policy_and_result) ... ok
+test_unavailable_model_or_effort_has_no_fallback (test_worker_ux.PolicyEvidenceTests.test_unavailable_model_or_effort_has_no_fallback) ... ok
+test_exact_core_roles_and_defaults (test_worker_ux.RoleTests.test_exact_core_roles_and_defaults) ... ok
+test_invalid_role_policy (test_worker_ux.RoleTests.test_invalid_role_policy) ... ok
+
+----------------------------------------------------------------------
+Ran 50 tests in 21.714s
+
+OK

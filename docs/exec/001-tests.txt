@@ -1,0 +1,32 @@
+test_bad_schema_rejected (test_devflow.PolicyTests.test_bad_schema_rejected) ... ok
+test_each_risk_routes_to_planned (test_devflow.PolicyTests.test_each_risk_routes_to_planned) ... ok
+test_local_low_risk_is_simple (test_devflow.PolicyTests.test_local_low_risk_is_simple) ... ok
+test_stdout_stderr_and_exit_status (test_devflow.ProcessTests.test_stdout_stderr_and_exit_status) ... ok
+test_timeout_kills_child_process_group (test_devflow.ProcessTests.test_timeout_kills_child_process_group) ... ok
+test_sigint_preserves_validation_evidence_and_kills_children (test_devflow.ValidationSignalTests.test_sigint_preserves_validation_evidence_and_kills_children) ... ok
+test_sigterm_preserves_validation_evidence_and_kills_children (test_devflow.ValidationSignalTests.test_sigterm_preserves_validation_evidence_and_kills_children) ... ok
+test_cli_exit_codes_and_config (test_devflow.WorkflowTests.test_cli_exit_codes_and_config) ... ok
+test_cli_failure_exit_codes (test_devflow.WorkflowTests.test_cli_failure_exit_codes) ... ok
+test_codex_failures_preserve_final_artifacts (test_devflow.WorkflowTests.test_codex_failures_preserve_final_artifacts) ... ok
+test_config_rejects_bad_values_and_cli_overrides (test_devflow.WorkflowTests.test_config_rejects_bad_values_and_cli_overrides) ... ok
+test_interruption_between_validation_commands (test_devflow.WorkflowTests.test_interruption_between_validation_commands) ... ok
+test_interruption_finalizes_run (test_devflow.WorkflowTests.test_interruption_finalizes_run) ... ok
+test_lock_prevents_simultaneous_run (test_devflow.WorkflowTests.test_lock_prevents_simultaneous_run) ... ok
+test_missing_executable_is_recorded (test_devflow.WorkflowTests.test_missing_executable_is_recorded) ... ok
+test_missing_validation_is_unverified_even_with_passing_review (test_devflow.WorkflowTests.test_missing_validation_is_unverified_even_with_passing_review) ... ok
+test_planned_end_to_end_artifacts_and_context (test_devflow.WorkflowTests.test_planned_end_to_end_artifacts_and_context) ... ok
+test_preexisting_changes_are_preserved_and_not_counted (test_devflow.WorkflowTests.test_preexisting_changes_are_preserved_and_not_counted) ... ok
+test_repair_worker_error_finalizes_repair (test_devflow.WorkflowTests.test_repair_worker_error_finalizes_repair) ... ok
+test_repair_worker_interruption_finalizes_repair (test_devflow.WorkflowTests.test_repair_worker_interruption_finalizes_repair) ... ok
+test_review_failure_repairs (test_devflow.WorkflowTests.test_review_failure_repairs) ... ok
+test_review_failure_stops_at_limit (test_devflow.WorkflowTests.test_review_failure_stops_at_limit) ... ok
+test_simple_skips_plan_review (test_devflow.WorkflowTests.test_simple_skips_plan_review) ... ok
+test_validation_repair_then_revalidate_and_rereview (test_devflow.WorkflowTests.test_validation_repair_then_revalidate_and_rereview) ... ok
+test_validation_timeout_is_failure (test_devflow.WorkflowTests.test_validation_timeout_is_failure) ... ok
+test_worker_saves_process_evidence_before_reraising_interruption (test_devflow.WorkflowTests.test_worker_saves_process_evidence_before_reraising_interruption) ... ok
+test_zero_repairs_and_all_validation_commands_recorded (test_devflow.WorkflowTests.test_zero_repairs_and_all_validation_commands_recorded) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 16.587s
+
+OK

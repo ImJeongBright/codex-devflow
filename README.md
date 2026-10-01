@@ -1,214 +1,149 @@
 # codex-devflow
 
-> **Codex에게 반복적으로 내리던 개발 지휘를 코드화하고, 그 workflow가 실제로 더 나은 개발 결과를 만드는지 측정하는 local-first development orchestrator.**
+하나의 개발 요청을 **분석 → 계획 → 구현 → 검증 → 리뷰 → 실행 기록**으로 연결하는 로컬 개발 도구입니다. 로그인된 Codex CLI를 실행 엔진으로 사용하고, workflow 상태·timeout·repair 한도·검증 결과·artifact 저장은 Python 코드로 관리합니다.
 
-Codex DevFlow는 **하나의 개발 요청을 분석 → 계획 → 구현 → 검증 → 리뷰 → 실행 기록으로 연결하는 로컬 개발 오케스트레이션 도구**입니다.
-
-핵심은 새로운 LLM이나 범용 Agent Framework를 만드는 것이 아니라, 이미 사용 중인 Codex CLI를 실행 엔진으로 두고 반복적인 개발 지휘 과정을 프로그램으로 옮기는 것입니다.
-
-## 정체성
-
-Codex DevFlow가 관리하는 것은 모델 자체가 아니라 **개발 workflow**입니다.
+## 실행 흐름
 
 ~~~text
-사용자
-"기능을 만들어줘"
-      ↓
-Codex DevFlow
-      ↓
-Analyze → Plan → Implement → Validate → Review → Repair → Document
+Task → Read-only Scout → Deterministic Policy
+                         ├─ simple:  Implement → Validate
+                         └─ planned: Plan → Implement → Validate → General Review
+
+Validation / Review 실패 → Repair → 다시 Validate / Review (설정한 한도까지)
+시작된 run의 모든 종료 → run.json + exec.md + 단계별 evidence
 ~~~
 
-Skill은 "이 일을 어떻게 할지"를 제공하고, DevFlow는 "언제 어떤 일을 실행하고 실패 시 어디로 돌아갈지"를 관리합니다.
+분석 결과가 local/low risk이고 DB, transaction, async, concurrency, retry/idempotency, migration, external integration 신호가 모두 false이면 simple 경로를 선택합니다. 나머지는 planned 경로를 선택합니다.
 
-Multi-Agent는 목표가 아닙니다. 실제 Task에서 독립적인 review나 context isolation이 이득일 때만 사용합니다.
+각 Codex 단계는 독립적인 `codex exec` 프로세스로 순차 실행합니다. Scout·Plan·Review는 `read-only`, Implement·Repair는 `workspace-write` sandbox를 사용합니다.
 
-Planner / Implementer / Reviewer 역할 분리도 처음부터 native Subagent를 요구하지 않습니다. V1에서는 DevFlow가 필요한 역할마다 독립적인 `codex exec` CLI worker를 실행하고 결과를 취합합니다.
+## 시작하기
 
-더 자세한 배경과 차별점은 [왜 Codex DevFlow인가](docs/WHY.md)를 참고합니다.
-
-## 문제
-
-현재 Coding Agent를 사용할 때 다음 지시를 반복하게 됩니다.
-
-~~~text
-저장소 분석해
-→ 계획 문서 작성해
-→ 계획대로 구현해
-→ 테스트해
-→ diff 검토해
-→ 문제 있으면 수정해
-→ 실제 변경 내용을 exec 문서로 남겨
-~~~
-
-Codex DevFlow는 이 과정을 하나의 재사용 가능한 workflow로 묶습니다.
-
-~~~text
-사용자 Task
-    ↓
-Codex Scout
-    ↓
-작업 특성 분석
-    ↓
-DevFlow Policy
-    ↓
-Plan
-    ↓
-Implement
-    ↓
-Build / Test
-    ↓
-Review
-    ↓
-Repair
-    ↓
-Exec
-~~~
-
-## 기존 방식과의 차이
-
-| 방식 | 강점 | DevFlow와의 차이 |
-| --- | --- | --- |
-| Direct Codex | 가장 단순 | 후속 개발 절차를 사용자가 계속 지휘할 수 있음 |
-| Codex + Skill | 반복 가능한 업무 절차 제공 | Skill 자체는 전체 workflow state를 관리하지 않음 |
-| Codex DevFlow | workflow 실행, 검증, 기록을 통합 | orchestration overhead가 생길 수 있어 Eval 필요 |
-| API 기반 Agent App | 원격 서비스와 세밀한 제어에 유리 | API Key, 별도 비용, billing/SDK 운영이 추가됨 |
-
-## 기대효과
-
-구현 전에는 가설이며 Eval로 검증합니다.
-
-- 반복적인 Plan / Implement / Test / Review 지시 감소
-- Task 유형에 따른 개발 절차 일관성
-- build/test/lint를 통한 deterministic validation
-- 실패 단계와 repair 이력 추적
-- 실제 프로젝트에서 지속적으로 사용하는 local tool
-- 단순 Task에는 가벼운 경로, 복잡한 Task에는 강한 검증 경로 선택
-
-## 왜 Codex CLI인가
-
-첫 구현에서는 OpenAI API를 직접 연동하지 않습니다.
-
-ChatGPT 계정으로 로그인된 Codex CLI를 execution backend로 사용합니다. 따라서 DevFlow 자체가 API Key, 직접적인 API billing, 모델 SDK를 관리할 필요가 없습니다.
-
-~~~text
-DevFlow
-  ↓
-Codex CLI
-  ↓
-ChatGPT-authenticated Codex
-  ↓
-OpenAI backend
-~~~
-
-이것은 추론이 로컬이거나 무료라는 의미가 아닙니다. Codex 사용량은 사용자의 ChatGPT 플랜 allowance/credit을 소비합니다.
-
-이 프로젝트에서 중요한 점은 **DevFlow가 별도의 LLM API client가 될 필요가 없다는 것**입니다.
-
-## 설계 원칙
-
-1. **한 번의 요청으로 개발 흐름을 시작한다.**
-2. **LLM은 의미를 해석하고, 프로그램은 정책을 결정한다.**
-3. **build/test/lint처럼 확정적으로 검사할 수 있는 것은 코드로 검증한다.**
-4. **Skill은 반복 가능한 업무 절차를 제공하고, workflow state는 DevFlow가 관리한다.**
-5. **단순 작업에 복잡한 orchestration을 강제하지 않는다.**
-6. **Multi-Agent는 목표가 아니라 필요할 때 선택하는 수단이다.**
-7. **효과는 Eval로 검증한 뒤 주장한다.**
-
-## 목표 구조
-
-~~~text
-User Task
-    |
-    v
-Codex Scout / Classifier
-    |
-    | structured signals
-    v
-DevFlow Policy Engine
-    |
-    +------------+-------------+
-    |            |             |
-  SIMPLE       MEDIUM        COMPLEX
-    |            |             |
- Implement      Plan          Plan
- Validate       Implement     Implement
- Finish         Validate      Validate
-                Review        Specialized Review
-                Finish        Bounded Repair
-                              Exec
-~~~
-
-초기의 SIMPLE / MEDIUM / COMPLEX 경계는 확정하지 않습니다. 실제 Task와 Eval 결과를 기반으로 조정합니다.
-
-## 첫 번째 범위
-
-포함:
-
-- 로컬 CLI
-- Codex CLI execution backend
-- 저장소 기반 Task 분석
-- structured output
-- deterministic workflow routing
-- Plan / Exec artifact
-- build / test / lint 실행
-- bounded repair
-- run log / metric
-- 향후 Skill 및 Subagent 확장 가능 구조
-
-포함하지 않음:
-
-- SaaS
-- OpenAI API 직접 연동
-- Multi-LLM 지원
-- 자동 merge
-- 무제한 Agent loop
-- Multi-Agent 자체를 위한 Multi-Agent
-
-## 예상 사용 형태
+가상 환경에 설치한 뒤, 터미널에서 다음 명령만 입력하면 Task를 입력할 수 있습니다.
 
 ~~~bash
-codex-devflow feature "ImTicket에 메시지 버스 기반 비동기 후처리를 추가"
+.venv/bin/codex-devflow feature
 ~~~
 
-명령 이름과 구현 언어는 첫 구현 과정에서 확정합니다.
+Task 입력 후 Enter를 누르면 설정된 기본 policy로 실행합니다. `c`로 Role별 model/reasoning을 조정하고 `s`로 project 기본값을 저장할 수 있습니다. 설치 및 상세 사용법은 [사용자 매뉴얼](docs/MANUAL.md)을 참고하세요.
 
-## 평가
+필요 환경: Python 3.11+, POSIX(macOS/Linux), Git, 로그인된 Codex CLI.
 
-DevFlow가 더 복잡하다는 이유만으로 더 좋다고 가정하지 않습니다.
+~~~bash
+codex login
+python3 -m codex_devflow feature "개발 요청" --repo /path/to/repository \
+  --validate "python3 -m unittest discover -s tests -v"
+~~~
+
+위 명령은 이 프로젝트 디렉터리에서 실행합니다. CLI를 설치하면 다른 디렉터리에서도 사용할 수 있습니다.
+
+~~~bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/codex-devflow feature "개발 요청" --repo /path/to/repository
+~~~
+
+Codex 인증은 설치된 CLI 설정을 따릅니다. 모델과 reasoning은 아래의 역할별 정책을 명시적으로 전달합니다. DevFlow에는 API client나 API key 관리 기능이 없습니다. 실제 Codex 실행에는 계정의 사용량과 네트워크 연결이 필요합니다.
+
+## 프로젝트별 검증 설정
+
+Target Git 저장소 루트에 `.codex-devflow.json`을 작성합니다.
+
+~~~json
+{
+  "validation_commands": ["python3 -m unittest discover -s tests -v"],
+  "timeout_seconds": 600,
+  "max_repairs": 1
+}
+~~~
+
+- `--validate`를 반복해서 여러 명령을 전달할 수 있습니다. 전달하면 설정 파일의 명령 목록을 대체합니다.
+- `--timeout`은 각 Codex 프로세스와 각 validation 명령의 제한 시간(초)입니다.
+- `--max-repairs 0`은 자동 수정을 끕니다. 기본값은 1입니다.
+- `--codex /path/to/codex`로 실행 파일을 지정할 수 있습니다.
+- 설정한 validation 명령은 Git 저장소 루트에서 `/bin/sh -c`로 실행합니다. 사용자가 신뢰하는 명령을 설정해야 합니다.
+- 검증 명령이 없으면 `unavailable`로 기록하고 최종 결과는 `unverified`로 남깁니다.
+
+| 종료 상태 | CLI 코드 | 의미 |
+| --- | --- | --- |
+| `succeeded` | 0 | 설정된 validation과 필요한 review 통과 |
+| `failed` | 1 | repair 한도 내 해결하지 못한 validation/review 실패 |
+| `error` | 2 | 실행·schema·설정 오류 |
+| `unverified` | 3 | validation 미설정, 필요한 review는 통과 |
+| `interrupted` | 130 | SIGINT/SIGTERM으로 중단 |
+
+설정·repository 오류는 run 생성 전에 종료될 수 있습니다. 작업의 최종 수용 여부는 사용자가 결과와 diff를 확인해 판단합니다.
+
+## Worker 모델 정책
+
+| Role | Model | Reasoning | Sandbox |
+| --- | --- | --- | --- |
+| scout | gpt-6-luna | max | read-only |
+| planner | gpt-6.1-sol | high | read-only |
+| implementer | gpt-6-luna | max | workspace-write |
+| reviewer | gpt-6-luna | max | read-only |
+| repairer | gpt-6-luna | max | workspace-write |
+
+설정 우선순위는 built-in → global → repository → 이번 실행 선택/CLI override입니다. Global 설정은 `${XDG_CONFIG_HOME:-~/.config}/codex-devflow/config.json`의 JSON을 읽습니다. Repository 설정의 `roles`에서 Role별 `model`, `reasoning_effort`를 부분 지정할 수 있습니다.
+
+~~~bash
+codex-devflow feature "개발 요청" --repo /path/to/project \
+  --role-model reviewer=gpt-6.1-sol --role-reasoning reviewer=high
+~~~
+
+사용할 수 없는 모델이나 effort에서는 실패 증거를 남기고 종료합니다. Custom model ID도 선택할 수 있습니다. 모델을 자동 대체하지 않습니다. Non-TTY에서 Task를 생략하면 usage error로 종료합니다.
+
+TTY에서는 현재 Role, model, reasoning, elapsed, validation 실패, repair 횟수와 최종 Exec 경로를 stderr에 표시합니다. Direct mode의 stdout 최종 JSON은 유지됩니다.
+
+## 실행 기록
 
 ~~~text
-Direct Codex
-vs
-Codex + Skill
-vs
-Codex DevFlow
+<target>/.codex-devflow/runs/<run-id>/
+  task.json
+  analysis.json
+  plan.json / plan.md
+  baseline.json / baseline.diff / changes.diff
+  steps/<step>/prompt.txt, schema.json, response.json, stdout.log, stderr.log, result.json
+  validation/<attempt>/<command>/stdout.log, stderr.log
+  validation.json / review.json / repair.json
+  run.json / exec.md
 ~~~
 
-동일한 실제 개발 Task에서 Task success, first-pass success, human rework, elapsed time, Codex usage 등의 trade-off를 비교합니다.
+`analysis`와 `plan.json`은 해당 단계가 성공했을 때 생성됩니다. Simple 경로의 `plan.md`에는 생략 사유가 기록됩니다. 실패 또는 중단 시 마지막 단계와 남아 있는 evidence를 최종 기록에 보존합니다.
+
+Changed files는 실행 전후 내용·파일 모드 snapshot으로 계산합니다. `changes.diff`에는 기존 working tree 변경도 포함되며, `baseline.diff`로 시작 상태를 확인할 수 있습니다. `.codex-devflow/`를 target의 `.gitignore`에 추가하는 것을 권장합니다. 로그에는 task와 코드가 포함되므로 공유 전에 내용을 확인하세요.
+
+## 현재 범위
+
+현재 구현에는 역할별 모델 정책과 interactive terminal UX, 로컬 CLI, Codex backend abstraction, versioned structured analysis/review, 두 경로의 routing, Plan/Exec, shell validation, bounded repair, 실행 시간과 CLI가 노출한 usage 기록이 포함됩니다.
+
+한 저장소에서는 한 run씩 실행합니다. 종료된 run의 resume은 지원하지 않습니다. DevFlow는 push·PR 생성·merge·branch 삭제·파괴적 DB 작업을 실행 단계로 제공하지 않으며, Codex prompt에도 해당 동작을 금지합니다. 이 경계는 CLI sandbox와 prompt에 의존합니다.
+
+전문 review, 병렬 worker, native subagent, API backend, eval harness는 [Roadmap](docs/ROADMAP.md)의 후속 단계입니다.
+
+## 검증과 평가
+
+~~~bash
+python3 -m unittest discover -s tests -v
+~~~
+
+테스트는 fake Codex executable과 임시 Git 저장소로 routing, structured output, subprocess 실행, timeout, repair, 중단, artifact를 확인합니다. 실제 Codex 실행과 요구사항별 검증 결과는 [001 실행 기록](docs/exec/001-initial-implementation.md)과 [002 실행 기록](docs/exec/002-worker-role-model-interactive-ux.md)에 정리합니다.
+
+생산성·품질·비용 개선은 비교 실험으로 확인할 가설입니다. V0는 elapsed time, Codex 실행 횟수, validation/repair 횟수와 CLI가 노출한 usage를 기록합니다. Direct Codex와의 비교 평가는 [평가 전략](docs/EVALUATION.md)을 따릅니다.
 
 ## 문서
 
-- [왜 Codex DevFlow인가](docs/WHY.md)
+- [사용자 매뉴얼](docs/MANUAL.md)
+- [PRD](docs/PRD.md)
 - [프로젝트 정의](docs/PROJECT.md)
 - [아키텍처](docs/ARCHITECTURE.md)
-- [평가 전략](docs/EVALUATION.md)
-- [Roadmap](docs/ROADMAP.md)
 - [첫 번째 구현 계획](docs/plans/001-initial-implementation.md)
-- [002 Worker Role / Model Policy / Interactive UX](docs/plans/002-worker-role-model-interactive-ux.md)
+- [001 실행 기록](docs/exec/001-initial-implementation.md)
+- [002 구현 계획](docs/plans/002-worker-role-model-interactive-ux.md)
+- [002 실행 기록](docs/exec/002-worker-role-model-interactive-ux.md)
+- [왜 Codex DevFlow인가](docs/WHY.md)
+- [Roadmap](docs/ROADMAP.md)
 - [공식 레퍼런스](docs/REFERENCES.md)
-
-## 현재 상태
-
-설계 및 첫 구현 준비 단계입니다.
-
-첫 목표는 거대한 Multi-Agent Framework가 아닙니다.
-
-~~~text
-Analyze → Plan → Implement → Validate → Review → Document
-~~~
-
-이 흐름을 실제 저장소 Task 하나에서 끝까지 실행하고, 기존 Codex 사용 방식보다 무엇이 좋아지고 무엇이 비싸지는지 측정할 수 있는 상태까지 만드는 것이 첫 목표입니다.
 
 ## License
 

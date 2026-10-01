@@ -1,0 +1,5 @@
+{
+  "validation_commands": ["python3 -m unittest discover -s tests -v"],
+  "timeout_seconds": 600,
+  "max_repairs": 1
+}
