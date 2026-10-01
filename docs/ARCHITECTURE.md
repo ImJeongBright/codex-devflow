@@ -11,6 +11,7 @@ DevFlow는 Python 3.11+ 표준 라이브러리로 구현되며 POSIX 환경에�
 | CLI/config | `codex_devflow/cli.py` | task·repository·검증 명령·timeout·repair 설정, 종료 코드 |
 | Config policy | `codex_devflow/config.py` | global/project/run 병합과 project role 저장 |
 | Role policy | `codex_devflow/roles.py` | 다섯 Core Role, model/reasoning, 고정 sandbox |
+| Model catalog | `codex_devflow/catalog.py` | Codex 로컬 공개 모델 목록과 내장 목록, 표시 이름/ID 및 reasoning 안내 |
 | Terminal adapter | `codex_devflow/terminal.py` | interactive 입력, customization, stderr progress |
 | Backend abstraction | `codex_devflow/backend.py` | `CodexExecutionBackend` protocol, `CodexCliBackend`, normalized result |
 | Process | `codex_devflow/process.py` | stdin 전달, stdout/stderr 파일, exit code·elapsed, timeout/중단 시 process group 정리 |
@@ -108,6 +109,8 @@ Backend는 `WorkerPolicy`를 받고 `--model MODEL`, `--config 'model_reasoning_
 `terminal.py`는 input/output adapter다. Task argument가 없고 stdin/stdout이 모두 TTY이면 terminal 입력을 연다. Task argument가 있으면 direct mode를 유지한다. Non-TTY에서 task가 없으면 usage error로 즉시 종료한다.
 
 Input은 repository 확인, 한 줄 Task 또는 `:multi` 입력, effective defaults 확인, 번호 선택 customization, custom model ID, Run/Save project defaults/Cancel을 제공한다. 기본 흐름은 Task 입력 후 Enter로 실행한다. Save는 roles만 project config에 저장하고 기존 validation 설정을 보존한다.
+
+Model 메뉴는 `catalog.py`를 통해 `$CODEX_HOME/models_cache.json` 또는 기본 `~/.codex/models_cache.json`을 읽는다. 표시용 `visibility=list` 항목만 사용하고 잘못된 ID와 중복은 제외한다. 현재 기본 모델이 목록에 있으면 1/2번을 유지하고 나머지 모델도 표시한다. 캐시 읽기/형식 오류에는 확장된 내장 목록을 표시한다. 정상적인 빈 캐시는 custom ID 입력을 제공한다. 선택한 모델의 지원 reasoning metadata는 안내로 표시하며 기존 effort와 서버 검증은 유지한다. 이 경로에는 외부 API 호출, 인증 접근, subprocess가 없다. Worker execution fallback과 catalog의 내장 목록 사용은 별개이며 모델 실행 조건을 자동 변경하지 않는다.
 
 Workflow는 선택적으로 event callback을 받는다. Worker 시작/완료, validation 명령과 결과, repair budget, finalize와 최종 요약을 보낸다. TTY progress adapter는 stderr에 쓴다. 기존 stdout 최종 JSON은 direct automation에서 유지된다. UI output이 BrokenPipe 등 OSError로 실패하면 progress만 중지한다.
 

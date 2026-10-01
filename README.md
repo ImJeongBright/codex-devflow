@@ -91,7 +91,9 @@ codex-devflow feature "개발 요청" --repo /path/to/project \
   --role-model reviewer=gpt-6.1-sol --role-reasoning reviewer=high
 ~~~
 
-사용할 수 없는 모델이나 effort에서는 실패 증거를 남기고 종료합니다. Custom model ID도 선택할 수 있습니다. 모델을 자동 대체하지 않습니다. Non-TTY에서 Task를 생략하면 usage error로 종료합니다.
+`c` → Role 선택 → Model 메뉴에서 Codex의 로컬 모델 목록을 확인할 수 있습니다. 목록은 `$CODEX_HOME/models_cache.json` 또는 `~/.codex/models_cache.json`의 공개 항목을 읽습니다. Codex가 목록을 갱신하면 다음 customization에서 새 모델도 표시됩니다. 캐시를 읽을 수 없으면 Luna/Sol 외에 Astra, GPT-6 Sol, GPT-5.6 Sol/Terra/Luna, GPT-5.5를 포함한 내장 목록을 표시합니다.
+
+사용할 수 없는 모델이나 effort에서는 실패 증거를 남기고 종료합니다. 목록은 계정의 실행 권한을 보장하지 않으며 캐시가 오래됐을 수 있습니다. Model 메뉴의 `c`로 custom model ID도 입력할 수 있습니다. 지원 reasoning 정보가 있으면 안내하며 effort는 사용자가 선택합니다. 모델이나 effort를 자동 대체하지 않습니다. Non-TTY에서 Task를 생략하면 usage error로 종료합니다.
 
 TTY에서는 현재 Role, model, reasoning, elapsed, validation 실패, repair 횟수와 최종 Exec 경로를 stderr에 표시합니다. Direct mode의 stdout 최종 JSON은 유지됩니다.
 

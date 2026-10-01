@@ -16,7 +16,8 @@ class Role(str, Enum):
         return "workspace-write" if self in (Role.IMPLEMENTER, Role.REPAIRER) else "read-only"
 
 
-MODEL_PRESETS = ("gpt-6-luna", "gpt-6.1-sol")
+MODEL_PRESETS = ("gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra", "gpt-6-sol",
+                 "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.5")
 REASONING_PRESETS = ("none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra")
 
 

@@ -32,7 +32,7 @@ python3 -m venv .venv
 현재 Git repository를 확인한 뒤 Task를 입력하고 Enter로 실행합니다. 추가 model 설정을 입력할 필요가 없습니다. 여러 줄 Task는 `:multi`를 입력하고 내용을 쓴 뒤 한 줄에 `.`만 입력해 마칩니다.
 
 - 기본 화면의 Enter 또는 `r`: 이번 선택으로 실행합니다.
-- `c`: Role 번호를 고르고 model과 reasoning을 변경합니다. Model 메뉴의 `c`는 custom model ID 입력입니다. 각 메뉴에서 Enter를 누르면 현재 값을 유지합니다.
+- `c`: Role 번호를 고르고 model과 reasoning을 변경합니다. Model 메뉴는 Codex의 공개 모델을 이름/ID와 번호로 표시합니다. Model 메뉴의 `c`는 custom model ID 입력입니다. 각 메뉴에서 Enter를 누르면 현재 값을 유지합니다.
 - `s`: 현재 role policy를 project 기본값으로 저장합니다. 저장 후 Enter로 실행하거나 `q`로 실행을 취소할 수 있습니다. 기존 validation/timeout/repair 값은 보존됩니다.
 - `q`, Ctrl+C 또는 입력 종료: Codex worker를 시작하기 전에 취소합니다.
 
@@ -126,6 +126,16 @@ codex-devflow feature "개발 요청" --repo /path/to/project \
 ~~~
 
 다른 Role도 같은 옵션을 반복해서 지정합니다. Custom model ID를 허용하지만 model/effort의 실제 사용 가능 여부는 설치된 Codex와 계정에서 결정됩니다. 지원되지 않으면 실패로 종료하고, 다른 model로 자동 fallback하지 않습니다. 모델 품질이나 비용 차이에 대한 결론을 전제하지 않습니다.
+
+### 모델 선택 목록
+
+Customization을 열 때 `$CODEX_HOME/models_cache.json`을 읽습니다. `CODEX_HOME`을 설정하지 않으면 `~/.codex/models_cache.json`입니다. Codex의 `visibility=list` 항목을 표시하고 숨김·중복·잘못된 ID는 제외합니다. 기존 단축 선택을 유지하려고 Luna와 GPT-6.1 Sol이 목록에 있으면 1/2번에 표시하고, 나머지는 캐시 순서로 표시합니다.
+
+현재 로컬 목록에는 GPT-6 Astra, GPT-6 Sol, GPT-5.6 Sol/Terra/Luna, GPT-5.5도 있습니다. DevFlow가 두 모델로 선택을 제한하지 않으며 Codex가 캐시를 갱신하면 다음 customization에서 새 목록을 읽습니다. 캐시를 읽을 수 없으면 위 모델들을 포함한 내장 목록을 표시하고 출처를 안내합니다. 정상적인 빈 캐시는 custom ID 입력만 제공합니다.
+
+선택한 모델의 지원 reasoning 정보가 캐시에 있으면 Reasoning 메뉴 앞에 표시합니다. 예를 들어 GPT-5.5의 캐시에는 max가 없으므로 표시된 지원 effort 중 하나를 직접 선택해야 합니다. Enter는 기존 effort를 유지하며 지원 여부를 대신 판단하거나 값을 자동 변경하지 않습니다. 캐시/내장 목록은 계정의 모델 접근 권한을 확인하는 수단이 아닙니다. 실행 시 Codex가 거부하면 해당 오류로 종료합니다.
+
+직접 OpenAI 모델 API를 호출하거나 인증 파일을 읽지 않습니다. 목록이 오래됐다면 Codex에서 모델 목록을 갱신한 뒤 customization을 다시 여세요. 별도의 `--codex` executable/provider를 사용하면 기본 Codex home의 목록과 다를 수 있으므로 custom ID를 사용하거나 해당 Codex home을 지정하세요.
 
 ## 4. 실행되는 단계
 

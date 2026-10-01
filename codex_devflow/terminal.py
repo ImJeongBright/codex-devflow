@@ -6,8 +6,9 @@ from pathlib import Path
 import sys
 
 from .config import configuration, save_project_roles
+from .catalog import load_model_catalog
 from .repository import root
-from .roles import MODEL_PRESETS, REASONING_PRESETS, Role, policies
+from .roles import REASONING_PRESETS, Role, policies
 
 
 class Cancelled(Exception):
@@ -66,8 +67,13 @@ class TerminalInput:
                 return value
             self.show("Task must not be empty.")
 
-    def choose(self, label, options, current, *, custom=False):
-        self.show(f"{label}: " + " | ".join(f"{i}. {value}" for i, value in enumerate(options, 1)))
+    def choose(self, label, options, current, *, custom=False, labels=None):
+        if labels is None:
+            self.show(f"{label}: " + " | ".join(f"{i}. {value}" for i, value in enumerate(options, 1)))
+        else:
+            self.show(f"{label}:")
+            for i, value in enumerate(labels, 1):
+                self.show(f"  {i}. {value}")
         while True:
             value = self.ask(f"Choice [Enter keeps {current}]" + (" / c custom" if custom else "") + ": ")
             if not value:
@@ -91,6 +97,10 @@ class TerminalInput:
     def customize(self, roles):
         result = deepcopy(roles)
         names = list(Role)
+        catalog = load_model_catalog()
+        self.show(catalog.source)
+        if not catalog.models:
+            self.show("No listed models in the Codex cache. Use c to enter a custom model ID.")
         while True:
             self.show("Customize roles: " + " | ".join(f"{i}. {role.value}" for i, role in enumerate(names, 1)))
             choice = self.ask("Role [Enter done, q cancel]: ").strip()
@@ -103,7 +113,15 @@ class TerminalInput:
                 continue
             name = names[int(choice) - 1].value
             fields = result[name]
-            fields["model"] = self.choose("Model", MODEL_PRESETS, fields["model"], custom=True)
+            fields["model"] = self.choose("Model", [model.model for model in catalog.models],
+                                          fields["model"], custom=True,
+                                          labels=[model.label for model in catalog.models])
+            selected = next((model for model in catalog.models if model.model == fields["model"]), None)
+            if selected is not None and selected.reasoning:
+                self.show("Supported reasoning (Codex cache): " + ", ".join(selected.reasoning))
+                if fields["reasoning_effort"] not in selected.reasoning:
+                    self.show(f"Current effort {fields['reasoning_effort']} is not listed for this model. "
+                              "Choose a supported effort; unsupported combinations fail at execution.")
             fields["reasoning_effort"] = self.choose("Reasoning", REASONING_PRESETS, fields["reasoning_effort"])
             policies(result)
 
